@@ -134,6 +134,7 @@
   <ItemGroup>
     <ClInclude Include="fileUtils.h" />
     <ClInclude Include="fileUtilsTests.h" />
+    <ClInclude Include="LogConsole.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
     <ClInclude Include="testPrintFunc.h" />
     <ClInclude Include="windowUtils.h" />

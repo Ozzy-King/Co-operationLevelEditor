@@ -16,6 +16,7 @@ int includeCount = 0;
 std::map<std::string, int> includeListToInt;
 std::map<int, std::string> includeListAtInt;
 
+//splitting string into tokens based on 
 std::vector<std::string> tokenizeString(std::string str, char ch, bool trim = false, char trimCh = ' ') {
 	std::vector<std::string> output;
 	std::string temp = "";
@@ -34,7 +35,9 @@ std::vector<std::string> tokenizeString(std::string str, char ch, bool trim = fa
 				tok.resize(tok.size()-2);
 			}
 		}
-		output.push_back(tok);
+		if (tok != "") {//make sure theres something to push
+			output.push_back(tok);
+		}
 		start = end+1;
 	}
 	return output;
@@ -42,24 +45,23 @@ std::vector<std::string> tokenizeString(std::string str, char ch, bool trim = fa
 
 
 
-
-
 int getIncludeFiles(std::string includeLine) {
 	//check everything is valid
-	size_t BrkOpen = includeLine.find('[');
-	if (BrkOpen == std::string::npos) { return 1; }
-	size_t BrkClose = includeLine.find(']');
-	if (BrkClose == std::string::npos) { return 1; }
 	size_t len = includeLine.size();
-	if (len == 0) { return 1; }
-	if (includeLine.find("include:") == std::string::npos) { return 1; }
+	if (len == 0) { LOG::error("getTileDefinition", "supplied empty line"); return 1; }
+	if (includeLine.find("include:") == std::string::npos) { LOG::error("getTileDefinition", "supplied invalid line"); return 1; }
+
+	size_t BrkOpen = includeLine.find('[');
+	if (BrkOpen == std::string::npos) { LOG::error("getTileDefinition", "cant find open brack"); return 1; }
+	size_t BrkClose = includeLine.find(']');
+	if (BrkClose == std::string::npos) { LOG::error("getTileDefinition", "cant find close brack"); return 1; }
 
 	//get file names and split at ',' and trim spaces
 	std::string names = includeLine.substr(BrkOpen+1, BrkClose - (BrkOpen + 1));
 	std::vector<std::string> includeList = tokenizeString(names, ',', true);
 
 	for (int i = 0; i < includeList.size(); i++) {
-		if (includeListToInt.find(includeList[i]) != includeListToInt.end()) { continue; }
+		if (includeListToInt.find(includeList[i]) != includeListToInt.end()) { LOG::log("getTileDefinition", "\""+includeList[i] + "\"" + " already in list"); continue; }
 		includeListToInt.insert({ includeList[i], includeCount });
 		includeListAtInt.insert({ includeCount, includeList[i] });
 		includeCount++;
@@ -69,20 +71,21 @@ int getIncludeFiles(std::string includeLine) {
 }
 
 int getObjectsInIncludes(std::vector<std::string> objectSelection) {
-	if (objectSelection[0] != "objectDefinitions:") { return 1; }
+	if (objectSelection.size() == 0) { LOG::error("getObjectsInIncludes", "supplied empty list"); return 1; }
+	if (objectSelection[0] != "objectDefinitions:") { LOG::error("getObjectsInIncludes", "supplied invalid list"); return 1; }
 	int colonPos;
 	std::string getObj;
 	for (int i = 1; i < objectSelection.size(); i++) {
 		//isolate the name
 		
 		colonPos = objectSelection[i].find(':'); //get colon position
-		if (colonPos == std::string::npos) { return 1; } //check colon has been found
+		if (colonPos == std::string::npos) { LOG::error("getObjectsInIncludes", "cant find colon on line: " + std::to_string(i)); return 1; } //check colon has been found
 
-		if (objectSelection[i][1] != ' ') { return 1; }//invalid as less than 2 spaces
+		if (objectSelection[i][1] != ' ') { LOG::error("getObjectsInIncludes", "not enough spaces on line: " + std::to_string(i)); return 1; }//invalid as less than 2 spaces
 		getObj = objectSelection[i].substr(2, colonPos-2);
-		if (getObj[0] == ' ') { return 1; }//invalid as more than 2 spaces
+		if (getObj[0] == ' ') { LOG::error("getObjectsInIncludes", "too many spaces on line: " + std::to_string(i)); return 1; }//invalid as more than 2 spaces
 
-		if (objectNamesToInt.find(getObj) != objectNamesToInt.end()) { continue; }
+		if (objectNamesToInt.find(getObj) != objectNamesToInt.end()) { LOG::log("getObjectsInIncludes", "\""+getObj +"\"" + " already added"); continue; }
 		
 		objectNamesToInt.insert({getObj, objectCount});
 		objectNamesAtInt.insert({ objectCount,getObj });
@@ -91,6 +94,35 @@ int getObjectsInIncludes(std::vector<std::string> objectSelection) {
 
 
 	return 0;
+}
+
+//need to finish. just finished getting thet itesm string - need to split and append to place
+int getTileDefinitions(std::vector<std::string> tileDefinition) {
+	if (tileDefinition.size() == 0) { LOG::error("getTileDefinition", "supplied empty list"); return 1; }
+	if (tileDefinition[0] != "gridObjects:") { LOG::error("getTileDefinition", "supplied invalid list"); return 1;  }
+	
+	for (int i = 1; i < tileDefinition.size(); i++) {
+		//split to name and objs
+		std::vector<std::string> nameItems = tokenizeString(tileDefinition[i], ':');
+		if (nameItems.size() < 2) { LOG::error("getTileDefinitions","invalid on line: " + i); return 1; }//isnt formated properly
+
+		//isolate name with out spaces// also check string
+		if (nameItems[0][1] != ' ') { LOG::error("getTileDefinitions", "not enough spaces on line: " + std::to_string(i)); return 1; }//invalid as less than 2 spaces
+		nameItems[0] = nameItems[0].substr(2);
+		if (nameItems[0][1] == ' ') { LOG::error("getTileDefinitions", "too many spaces on line: " + std::to_string(i)); return 1; }//invalid as more than 2 spaces
+
+		//get all the objects inside
+		if (nameItems[1].substr(0, 2) != " [") { LOG::error("getTileDefinitions", "line: " + std::to_string(i) + "formatted wrong"); return 1; } //if beigning isnt correct
+		if (nameItems[1][nameItems.size() - 1] == '\n') { nameItems[1] = nameItems[1].substr(0, nameItems[1].size() - 1); } //remove trailing newline if needed
+		if (nameItems[1][nameItems.size()-1] != ']') { LOG::error("getTileDefinitions", "line: " + std::to_string(i) + "formatted wrong"); return 1; } //if end isnt correct
+		//skip unnessaray charaters
+		nameItems[1] = nameItems[1].substr(0, 2);
+		nameItems[1] = nameItems[1].substr(0, nameItems[1].size()-1);
+
+
+	}
+	return 0;
+
 }
 
 //if testing build inclue test files

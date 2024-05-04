@@ -6,7 +6,14 @@ void TESTtokenizeString() {
 	int totalTests = 0;
 	std::cout << "testing tokenizeString\n";
 	std::string testInput = "test1, test2, test3";
-
+	
+	//check that empty string arnt included
+	std::string testInput2 = "test1,";
+	std::vector<std::string> output2 = tokenizeString(testInput2, ',');
+	
+	totalTests += 1;
+	error += TESTassert<int>(output2.size(), 1);
+	
 	//dont trim the spaces
 	std::vector<std::string> testOutputNoTrim = { "test1"," test2"," test3" };
 	std::vector<std::string> outputNoTrim = tokenizeString(testInput, ',');

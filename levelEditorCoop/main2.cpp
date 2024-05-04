@@ -5,6 +5,7 @@
 #ifdef TEST
 #include "testPrintFunc.h"
 #endif // TEST
+#include "LogConsole.h"
 
 
 
