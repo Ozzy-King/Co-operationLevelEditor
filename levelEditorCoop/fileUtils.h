@@ -16,6 +16,7 @@ int includeCount = 0;
 std::map<std::string, int> includeListToInt;
 std::map<int, std::string> includeListAtInt;
 
+
 //splitting string into tokens based on 
 std::vector<std::string> tokenizeString(std::string str, char ch, bool trim = false, char trimCh = ' ') {
 	std::vector<std::string> output;
@@ -106,18 +107,22 @@ int getTileDefinitions(std::vector<std::string> tileDefinition) {
 		std::vector<std::string> nameItems = tokenizeString(tileDefinition[i], ':');
 		if (nameItems.size() < 2) { LOG::error("getTileDefinitions","invalid on line: " + i); return 1; }//isnt formated properly
 
+		//------------------------for getting the tile defintion name
 		//isolate name with out spaces// also check string
 		if (nameItems[0][1] != ' ') { LOG::error("getTileDefinitions", "not enough spaces on line: " + std::to_string(i)); return 1; }//invalid as less than 2 spaces
 		nameItems[0] = nameItems[0].substr(2);
 		if (nameItems[0][1] == ' ') { LOG::error("getTileDefinitions", "too many spaces on line: " + std::to_string(i)); return 1; }//invalid as more than 2 spaces
 
+		//-----------------------for formatting the objects, spljting them up and 
 		//get all the objects inside
-		if (nameItems[1].substr(0, 2) != " [") { LOG::error("getTileDefinitions", "line: " + std::to_string(i) + "formatted wrong"); return 1; } //if beigning isnt correct
+		if (nameItems[1].substr(0, 2) != " [") { LOG::error("getTileDefinitions", "line: " + std::to_string(i) + " formatted wrong"); return 1; } //if beigning isnt correct
 		if (nameItems[1][nameItems.size() - 1] == '\n') { nameItems[1] = nameItems[1].substr(0, nameItems[1].size() - 1); } //remove trailing newline if needed
-		if (nameItems[1][nameItems.size()-1] != ']') { LOG::error("getTileDefinitions", "line: " + std::to_string(i) + "formatted wrong"); return 1; } //if end isnt correct
+		if (nameItems[1][nameItems.size()-1] != ']') { LOG::error("getTileDefinitions", "line: " + std::to_string(i) + " formatted wrong"); return 1; } //if end isnt correct
 		//skip unnessaray charaters
-		nameItems[1] = nameItems[1].substr(0, 2);
-		nameItems[1] = nameItems[1].substr(0, nameItems[1].size()-1);
+		nameItems[1] = nameItems[1].substr(2); //remove [
+		nameItems[1] = nameItems[1].substr(0, nameItems[1].size()-1); //remove ]
+
+		//split objects and place in maps
 
 
 	}

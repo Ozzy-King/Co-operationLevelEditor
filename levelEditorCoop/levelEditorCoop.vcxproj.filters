@@ -44,6 +44,9 @@
     <ClInclude Include="LogConsole.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mapUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="LevelsShared.yaml">
