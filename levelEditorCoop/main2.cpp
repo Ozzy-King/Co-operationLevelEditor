@@ -55,6 +55,7 @@ int main()
 	TESTtokenizeString();
 	TESTgetIncludeFiles();
 	TESTgetObjectsInIncludes();
+	TESTgetTileDefinitions();
 }
 
 #endif

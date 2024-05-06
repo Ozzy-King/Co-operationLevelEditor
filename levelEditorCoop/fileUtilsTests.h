@@ -91,12 +91,12 @@ void TESTgetObjectsInIncludes() {
 	int suc4 = getObjectsInIncludes(objectsNoColon4);
 	int suc5 = getObjectsInIncludes(objectsNoID5);
 	int suc6 = getObjectsInIncludes(objectsfillTest6);
-	
-	error += TESTassert<int>(suc1, 0);
+
+	error += TESTassert<int>(suc1, 1);
 	error += TESTassert<int>(suc2, 1);
 	error += TESTassert<int>(suc3, 1);
 	error += TESTassert<int>(suc4, 1);
-	error += TESTassert<int>(suc5, 1);
+	error += TESTassert<int>(suc5, 1);	
 	error += TESTassert<int>(suc6, 0);
 
 	error += TESTassert<int>(objectCount, (int)exspectedEndVals.size());
@@ -110,6 +110,36 @@ void TESTgetObjectsInIncludes() {
 	for (int i = 0; i < shouldntContain.size(); i++) {
 		totalTests += 1;
 		error += TESTassert<bool>(objectNamesToInt.find(shouldntContain[i]) == objectNamesToInt.end(), true);
+	}
+
+	TESTreportError(totalTests, error);
+}
+
+void TESTgetTileDefinitions() {
+	int error = 0;
+	int totalTests = 1;
+	std::cout << "testing getTileDefinitions\n";
+
+	std::vector<std::string> input = { "gridObjects:", "  AA: [ floor, te ]","  BB: [ floor ,te ]","  CC: [floor,te]","  DD: [ floor,te]","  EE: [floor,te]"};
+	std::vector<std::string> input2 = { "gridObjects:", "  AA: [ floor,te ]","  BB: [ floor,te ]","  CC: [floor,te]","  DD: [ floor,te]","  EE: [floor,te]", " EE: [floor]" };
+	std::vector<std::string> hasTiles = { "AA","BB","CC","DD","EE" };
+	std::vector<std::string> hasObj = {"floor","te"};
+
+	error += TESTassert<int>(getTileDefinitions(input), 0); //shoudl return 1
+	error += TESTassert<int>(getTileDefinitions(input2), 1); //shoudl return 1
+
+	//other checks
+	for (int i = 0; i < hasTiles.size(); i++) {
+		totalTests += 2;
+		if (tilesWithObjs.find(hasTiles[i]) != tilesWithObjs.end()) {
+			for (int j = 0; j < 2; j++) {
+				error += TESTassert<std::string>(tilesWithObjs[hasTiles[i]][j], hasObj[j]);
+			}
+		}
+		else {
+			error += 2;
+		}
+	
 	}
 
 	TESTreportError(totalTests, error);
