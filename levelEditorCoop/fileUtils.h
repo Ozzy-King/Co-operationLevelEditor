@@ -3,6 +3,8 @@
 #include <vector>
 #include <map>
 
+#include <fstream>
+
 //workigns
 //include [word.what]
 //123456789		    0
@@ -52,7 +54,6 @@ std::vector<std::string> tokenizeString(std::string str, char ch, bool trim = fa
 }
 
 
-
 int getIncludeFiles(std::string includeLine) {
 	//check everything is valid
 	size_t len = includeLine.size();
@@ -91,7 +92,7 @@ int getObjectsInIncludes(std::vector<std::string> objectSelection) {
 
 		if (objectSelection[i][1] != ' ') { LOG::error("getObjectsInIncludes", "not enough spaces on line: " + std::to_string(i)); return 1; }//invalid as less than 2 spaces
 		getObj = objectSelection[i].substr(2, colonPos-2);
-		if (getObj[0] == ' ') { LOG::error("getObjectsInIncludes", "too many spaces on line: " + std::to_string(i)); return 1; }//invalid as more than 2 spaces
+		if (getObj[0] == ' ') { LOG::error("getObjectsInIncludes", "too many spaces on line: " + std::to_string(i)); continue; }//invalid as more than 2 spaces
 
 		if (objectNamesToInt.find(getObj) != objectNamesToInt.end()) { LOG::error("getObjectsInIncludes", "\""+getObj +"\"" + " already added"); return 1; }
 		
@@ -151,11 +152,22 @@ int getMapLayout(std::vector<std::string> mapDefinition) {
 		mapDefinition[i] = mapDefinition[i].substr(2); //trim spaces
 		if (mapDefinition[i][mapDefinition.size() - 1] == '\n') { mapDefinition[i] = mapDefinition[i].substr(0, mapDefinition.size()-1); }
 		if (mapDefinition[i][0] == ' ') { LOG::error("getMapLayout", "too many spaces on line: " + std::to_string(i)); return 1; }
-		std::vector<std::string> mapLine = tokenizeString(mapDefinition[i], ',');
+		std::vector<std::string> mapLine = tokenizeString(mapDefinition[i], ',',true);
 		map.push_back(mapLine);
 	}
+	return 0;
 }
 
+//file io fuinctions
+
+int fileExist(std::string fileName) {
+	std::ifstream file(fileName.c_str());
+	if (file.is_open()) {
+		file.close();
+		return 1;
+	}
+	return 0;
+}
 
 //if testing build inclue test files
 #ifdef TEST

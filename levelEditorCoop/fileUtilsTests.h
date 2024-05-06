@@ -144,3 +144,32 @@ void TESTgetTileDefinitions() {
 
 	TESTreportError(totalTests, error);
 }
+
+void TESTgetMapLayout() {
+	int error = 0;
+	int totalTests = 0;
+	std::vector<std::string> input = {"grid: |", "  aa,bb, cc, dd", "  ac,ab,sv,df","  ft,hy,u,i"};
+	std::vector<std::string> input2 = { "grid: |", "  aa,bb, cc, dd", " ac,ab,sv,df","  ft,hy,u,i" };
+	std::vector<std::vector<std::string>> exspected = { {"aa","bb","cc","dd"}, {"ac", "ab", "sv", "df"}, {"ft", "hy", "u", "i"}};
+
+	totalTests += 1;
+	error += TESTassert<int>(getMapLayout(input), 0);
+
+	for (int y = 0; y < exspected.size(); y++) {
+		
+		for (int x = 0; x < exspected[y].size(); x++) {
+			totalTests += 1;
+			try {
+				error += TESTassert(map[y][x], exspected[y][x]);
+			}
+			catch( ... ) {
+				error += 1;
+			}
+		}
+	}
+
+	totalTests += 1;
+	error += TESTassert<int>(getMapLayout(input2), 1);
+
+	TESTreportError(totalTests, error);
+}

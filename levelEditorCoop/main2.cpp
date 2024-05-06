@@ -1,5 +1,5 @@
 #define OLC_PGE_APPLICATION
-#define TEST 
+//#define TEST 
 
 //if testing build inclue test files
 #ifdef TEST
@@ -41,8 +41,27 @@ public:
 	}
 };
 #ifndef TEST
-int main()
-{
+// -o open, -i include
+int main(int argc, char* argv[]) {
+	bool newfile = false, open = false, include = false;
+	//check argc argv
+	if (argc < 2) {//less than two arguments are not allowed
+		LOG::error("MAIN", "not enough paramerter entered.\n-n\tnew file\n-o\topen file\n-i\tinclude file");
+		return 0;
+	}
+	for (int i = 0; i < argc; i++) {
+		if (argv[i] == "-n") {
+			if (!open) {
+				newfile = true;
+			} else {
+				LOG::error("MAIN", "-n and -o were given");	return 0;
+			}
+		}
+
+
+	}
+
+
 	Example demo;
 	if (demo.Construct(256, 240, 4, 4))
 		demo.Start();
@@ -56,6 +75,7 @@ int main()
 	TESTgetIncludeFiles();
 	TESTgetObjectsInIncludes();
 	TESTgetTileDefinitions();
+	TESTgetMapLayout();
 }
 
 #endif
