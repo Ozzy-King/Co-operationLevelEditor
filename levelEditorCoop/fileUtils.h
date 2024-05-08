@@ -5,6 +5,30 @@
 
 #include <fstream>
 
+
+//file io fuinctions
+int fileExist(std::string fileName) {
+	std::ifstream file(fileName.c_str());
+	if (file.is_open()) {
+		file.close();
+		return 1;
+	}
+	return 0;
+}
+int OpenFile(std::string fileName, std::ifstream& out) {
+	out = std::ifstream(fileName.c_str());
+	if (out.is_open()) {
+		return 0;
+	}
+	return 1;
+}
+int readLine(std::ifstream& in, std::string& out) {
+	if (std::getline(in, out)) {
+		return 0;
+	}
+	return 1;
+}
+
 //workigns
 //include [word.what]
 //123456789		    0
@@ -88,13 +112,16 @@ int getObjectsInIncludes(std::vector<std::string> objectSelection) {
 		//isolate the name
 		
 		colonPos = objectSelection[i].find(':'); //get colon position
-		if (colonPos == std::string::npos) { LOG::error("getObjectsInIncludes", "cant find colon on line: " + std::to_string(i)); return 1; } //check colon has been found
+		if (colonPos == std::string::npos) { LOG::error("getObjectsInIncludes", "cant find colon on line: " + std::to_string(i)); continue; } //check colon has been found
 
 		if (objectSelection[i][1] != ' ') { LOG::error("getObjectsInIncludes", "not enough spaces on line: " + std::to_string(i)); return 1; }//invalid as less than 2 spaces
 		getObj = objectSelection[i].substr(2, colonPos-2);
-		if (getObj[0] == ' ') { LOG::error("getObjectsInIncludes", "too many spaces on line: " + std::to_string(i)); continue; }//invalid as more than 2 spaces
+		if (getObj[0] == '#') { LOG::log("getObjectsInIncludes", "comment on line:" + std::to_string(i)); continue; }//invalid as more than 2 spaces
+		if (getObj[0] == ' ') { LOG::log("getObjectsInIncludes", "too many spaces on line: " + std::to_string(i)); continue; }//invalid as more than 2 spaces
 
-		if (objectNamesToInt.find(getObj) != objectNamesToInt.end()) { LOG::error("getObjectsInIncludes", "\""+getObj +"\"" + " already added"); return 1; }
+		if (objectNamesToInt.find(getObj) != objectNamesToInt.end()) { 
+			LOG::log("getObjectsInIncludes", "\""+getObj +"\"" + " already added"); 
+		}
 		
 		objectNamesToInt.insert({getObj, objectCount});
 		objectNamesAtInt.insert({ objectCount,getObj });
@@ -158,14 +185,28 @@ int getMapLayout(std::vector<std::string> mapDefinition) {
 	return 0;
 }
 
-//file io fuinctions
-
-int fileExist(std::string fileName) {
-	std::ifstream file(fileName.c_str());
-	if (file.is_open()) {
-		file.close();
-		return 1;
+int readFullIncludeFile(std::string fileName) {
+	//read includes
+	std::ifstream openingFile;
+	std::string line = "";
+	if (OpenFile(fileName, openingFile)) {
+		LOG::error("MAIN", "could not open include file \"" + fileName + "\"");	return 0;
 	}
+	//read include
+	readLine(openingFile, line);
+	if (getIncludeFiles(line)) { LOG::log("readFullIncludeFile", "error occured while getting includes"); }//gets the files in level file
+	std::vector<std::string> objects;
+	while (line != "objectDefinitions:") {
+		if (readLine(openingFile, line)) { LOG::log("readFullIncludeFile", "could not find any objects in file \"" + fileName +"\"");  return 0; }
+	}
+	objects.push_back(line);
+	while (!readLine(openingFile, line)) {
+		if (line[0] == '\n' || line == "" || line[0] == '#') { continue; }
+		if (line[0] != ' ') { break; }
+		objects.push_back(line);
+	}
+	getObjectsInIncludes(objects);
+	openingFile.close();
 	return 0;
 }
 

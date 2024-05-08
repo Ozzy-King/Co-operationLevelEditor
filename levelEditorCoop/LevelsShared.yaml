@@ -1,4 +1,4 @@
-include: [ CoOpAnimationDefinitions.yaml, BuyableItems.yaml ]
+include: [ CoOpAnimationDefinitions.yaml, BuyableItems.yaml, FrankensteinShared.yaml ]
 
 fileProperties:
   creatorName: Mind Feast Games
