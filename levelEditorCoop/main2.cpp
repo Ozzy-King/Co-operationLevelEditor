@@ -116,6 +116,17 @@ public:
 			}
 		}
 
+		for (int i = 0; i <= 26; i ++) {
+			if (GetKey((olc::Key)i).bPressed) {
+				for (int j = currentItemPos+1; j < objectCount; j++) {
+					if (objectNamesAtInt[j][0] == (char)(i+0x40) || objectNamesAtInt[j][0] == (char)(i + 0x60)) {
+						currentItemPos = j;
+						break;
+					}
+				}
+			}
+		}
+
 		float counter = 1;
 		int mixCount = (objectCount > currentItemPos + 10 ? currentItemPos + 10 : objectCount);
 		for (int i = currentItemPos+1; i < mixCount; i++) {

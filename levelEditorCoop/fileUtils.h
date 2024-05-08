@@ -121,6 +121,7 @@ int getObjectsInIncludes(std::vector<std::string> objectSelection) {
 
 		if (objectNamesToInt.find(getObj) != objectNamesToInt.end()) { 
 			LOG::log("getObjectsInIncludes", "\""+getObj +"\"" + " already added"); 
+			continue;
 		}
 		
 		objectNamesToInt.insert({getObj, objectCount});
