@@ -211,6 +211,8 @@ int readFullIncludeFile(std::string fileName) {
 	return 0;
 }
 
+
+
 //if testing build inclue test files
 #ifdef TEST
 	#include "fileUtilsTests.h"

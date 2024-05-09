@@ -21,6 +21,8 @@ std::vector<std::string> originalIncludes;
 
 int currentItemPos;
 
+int saveMap();
+
 // Override base class with your custom functionality
 class Example : public olc::PixelGameEngine
 {
@@ -75,6 +77,9 @@ public:
 			int temp = getMapRowCol(objectNamesAtInt[currentItemPos], x / tileSize, (y - 20) / tileSize);
 			setMapRowCol(objectNamesAtInt[currentItemPos], x / tileSize, (y-20)/ tileSize, !temp);
 		}
+		if (GetKey(olc::F1).bReleased) {
+			saveMap();
+		}
 
 		return true;
 	}
@@ -96,6 +101,7 @@ public:
 	}
 
 	bool drawCurrentItem() {
+		//draw current selected object string
 		FillRectDecal({ 0,0 }, {(float)ScreenWidth(),21}, olc::RED);
 		DrawStringDecal({ 0,1 }, objectNamesAtInt[currentItemPos], olc::WHITE, {2.0,2.0});
 
@@ -103,6 +109,8 @@ public:
 	}
 	bool drawItems() {
 		static int oldmouse;
+
+		//move item select up or down
 		if (GetMouseWheel() < 0) {
 			currentItemPos += 1;
 			if (currentItemPos >= objectCount) {
@@ -116,6 +124,7 @@ public:
 			}
 		}
 
+		//if any ley is pressed got to nect object starting wiht that letter
 		for (int i = 0; i <= 26; i ++) {
 			if (GetKey((olc::Key)i).bPressed) {
 				for (int j = currentItemPos+1; j < objectCount; j++) {
@@ -127,6 +136,7 @@ public:
 			}
 		}
 
+		//draw 10 items after the selected
 		float counter = 1;
 		int mixCount = (objectCount > currentItemPos + 10 ? currentItemPos + 10 : objectCount);
 		for (int i = currentItemPos+1; i < mixCount; i++) {
@@ -269,3 +279,86 @@ int main()
 }
 
 #endif
+
+
+
+
+int saveMap() {
+	char validChar[] = "abcdefghijklmnopqrstuvwxyz123456789";
+
+	std::ofstream theFile(newFileName, std::ios::out);
+
+	//write original includes
+	std::string includes = "include: [";
+	for (int i = 0; i < originalIncludes.size(); i++) {
+		includes += originalIncludes[i] + (i == originalIncludes.size() - 1 ? "]\n" : ",");
+	}
+	theFile << includes;
+
+	//write fluff
+	theFile << "fileProperties:\n";
+	theFile << "  creatorName: OLACLevelEditor\n";
+	theFile << "sceneName : OriginalWorld\n";
+	theFile << "postProcessing :\n";
+	theFile << "  depthOfField : { enabled: false, focusDistance : 58, focalLength : 300.0, aperture : 1.0 }\n";
+
+	//write map
+	theFile << "grid: |\n";
+	std::string row = "  ";
+	for (int y = 0; y < 32; y++) {
+		row = "  ";
+		for (int x = 0; x < 32; x++) {
+			row += validChar[y];
+			row += validChar[x];
+			row += (x == 32 - 1 ? "\n" : ",");
+		}
+		theFile << row;
+	}
+	
+
+	//write the tile definitons
+	theFile << "gridObjects:\n";
+	row = "  ";
+	int x = 0;
+	int y = 0;
+	for (int y = 0; y < 32; y++) {
+		for (int x = 0; x < 32; x++) {
+			row = "  ";
+			std::string xytile = "";
+			bool firstIter = true;
+			xytile+= validChar[y];
+			xytile += validChar[x];
+
+			row += xytile;
+			row += ": [";
+
+			stringToXY(xytile, x, y);
+			for (auto it = Map.begin(); it != Map.end(); ++it) {
+				if (getMapRowCol(it->first, x, y)) {
+					if (firstIter) {
+						firstIter = false;
+					}
+					else {
+						row += ",";
+					}
+					row += it->first;
+				}
+			}
+			row += "]\n";
+			theFile << row;
+		}
+	}
+
+	theFile << "objectDefinitions:\n";
+	theFile << "sounds:\n";
+	theFile << "globalData:\n";
+
+	//# override the definitions in LevelsShared for level specific adjustments
+
+		
+
+
+
+
+	return 0;
+}

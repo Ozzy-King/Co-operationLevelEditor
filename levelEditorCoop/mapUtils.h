@@ -47,3 +47,16 @@ void setMapRowCol(std::string obj, int x, int y, int val) {
 		Map[obj][y] = Map[obj][y] & (~(1 << x));
 	}
 }
+
+//give 2char string with char from a-z 0-9
+void stringToXY(std::string tileStr, int& xout, int& yout) {
+	std::string validchar = "abcdefghijklmnopqrstuvwxyz123456789";
+	xout = -1; yout = -1;
+	if (tileStr.size() > 2 || tileStr.size() < 2) { return; }
+	if (validchar.find(tileStr[0]) == std::string::npos) { return; }
+	else { yout = validchar.find(tileStr[0]); }
+	if (validchar.find(tileStr[1]) == std::string::npos) { return; }
+	else { xout = validchar.find(tileStr[1]); }
+
+	return;
+}
